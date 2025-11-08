@@ -2,104 +2,66 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SAMAY — Hero</title>
-  <!-- Rive runtime -->
-  <script defer src="https://unpkg.com/@rive-app/canvas@latest"></script>
+  <title>Samay Raina | Hero</title>
+  <script src="https://unpkg.com/@rive-app/canvas@2.16.0"></script>
   <style>
-    /* ===== No-scroll full-viewport hero ===== */
-    :root { --pad: 20px; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body { overflow: hidden; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #fff; background: #0f0f10; }
-    .nav {
-      position: fixed; top: 0; left: 0; right: 0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px var(--pad); z-index: 10; backdrop-filter: blur(4px);
+    html, body {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;          /* no scroll */
+      background: #0d0d0d;
     }
-    .brand { font-weight: 700; letter-spacing: 0.6px; }
-    .nav a { color: #fff; opacity: .85; text-decoration: none; margin-left: 18px; font-size: 14px; }
-    .cta { background: #fff; color: #111; border: 0; padding: 10px 14px; border-radius: 999px; font-weight: 600; }
-
-    .hero {
-      position: relative; height: 100vh; width: 100vw;
-      display: grid; grid-template-columns: 1fr 1fr; align-items: center;
-      background: radial-gradient(1200px 600px at 60% 30%, #9c27ff 0%, #651fff 40%, #0f0f10 100%);
-      padding: 0 var(--pad);
-    }
-    .copy { position: relative; z-index: 2; }
-    .eyebrow { opacity: .9; font-size: 14px; margin-bottom: 8px; }
-    h1 { font-size: clamp(42px, 8vw, 110px); line-height: .9; margin: 0 0 10px; letter-spacing: -1px; }
-    h1 .ghost { position: absolute; inset: auto; left: var(--pad); top: 16%; font-size: clamp(96px, 18vw, 240px); opacity: .12; white-space: nowrap; pointer-events: none; }
-    .sub { opacity: .9; font-size: clamp(14px, 2vw, 18px); margin-bottom: 18px; }
-    .buttons { display: flex; gap: 10px; }
-    .btn { background: transparent; border: 1.5px solid rgba(255,255,255,.8); color: #fff; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 14px; }
-
-    .rive-wrap { position: relative; width: 100%; aspect-ratio: 4/3; }
-    canvas { width: 100%; height: 100%; display: block; }
-
-    @media (max-width: 900px){
-      .hero { grid-template-columns: 1fr; padding-top: 64px; }
-      h1 .ghost { left: var(--pad); top: 10%; }
+    /* Fullscreen canvas */
+    #riveCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      display: block;
     }
   </style>
 </head>
 <body>
-  <header class="nav">
-    <div class="brand">SAMAY</div>
-    <nav>
-      <a href="#" aria-disabled="true">Home</a>
-      <a href="#" aria-disabled="true">Portfolio</a>
-      <a href="#" aria-disabled="true">About</a>
-      <a href="#" aria-disabled="true">Contact</a>
-      <button class="cta">Let’s Talk!</button>
-    </nav>
-  </header>
-
-  <main class="hero">
-    <section class="copy">
-      <div class="eyebrow">Are we ready to start the show?</div>
-      <h1>
-        SAMAY
-        <span class="ghost">SAMAY</span>
-      </h1>
-      <div class="sub">Printing Engineer</div>
-      <div class="buttons">
-        <a class="btn" href="#" id="shopNow">See Merch</a>
-        <a class="btn" href="#" aria-disabled="true">About Me</a>
-      </div>
-    </section>
-
-    <section class="rive-wrap">
-      <canvas id="riveCanvas" role="img" aria-label="Hero animation"></canvas>
-    </section>
-  </main>
+  <canvas id="riveCanvas"></canvas>
 
   <script>
-    // Minimal Rive init with no state machine (plays default). If you have one, set stateMachines.
-    document.addEventListener("DOMContentLoaded", () => {
-      const canvas = document.getElementById("riveCanvas");
-      const r = new rive.Rive({
-        src: "assets/rive/Samay_Raina_raw.riv",
-        canvas,
-        autoplay: true,
-        fit: rive.Fit.CONTAIN,
-        // stateMachines: "StoreHero", // <— put your exact state machine name if used
-        onLoad: () => {
-          const dpr = window.devicePixelRatio || 1;
-          canvas.width = canvas.clientWidth * dpr;
-          canvas.height = canvas.clientHeight * dpr;
-          r.resizeDrawingSurfaceToCanvas();
-        }
-      });
+    const canvas = document.getElementById("riveCanvas");
+    let riveInstance = null;
 
-      window.addEventListener("resize", () => {
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.clientWidth * dpr;
-        canvas.height = canvas.clientHeight * dpr;
-        r.resizeDrawingSurfaceToCanvas();
-      });
+    // Keep canvas resolution in sync with screen
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width  = canvas.clientWidth  * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+      if (riveInstance) {
+        riveInstance.resizeDrawingSurfaceToCanvas();
+      }
+    }
+
+    // Create Rive with proper layout (no crop)
+    riveInstance = new rive.Rive({
+      src: "assets/rive/Samay_Raina_raw.riv",   // <-- your Samay file
+      canvas,
+      stateMachines: ["State Machine 1"],       // <-- change if your SM name is different
+      autoplay: true,
+      layout: new rive.Layout({
+        fit: rive.Fit.CONTAIN,                  // show full artboard without cropping
+        alignment: rive.Alignment.CENTER
+      }),
+      onLoad: () => {
+        resize();                               // size correctly once file is loaded
+      }
     });
+
+    // Optional interactions
+    canvas.addEventListener("mouseenter", () => riveInstance && riveInstance.play("State Machine 1"));
+    canvas.addEventListener("mouseleave", () => riveInstance && riveInstance.pause("State Machine 1"));
+    canvas.addEventListener("click",      () => riveInstance && riveInstance.play("State Machine 1"));
+
+    // Initial + responsive sizing
+    window.addEventListener("resize", resize);
+    resize();
   </script>
 </body>
 </html>
